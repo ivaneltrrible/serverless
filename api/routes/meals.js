@@ -36,14 +36,14 @@ router.post('/', (req, res) => {
 })
 
 router.put('/:id', (req, res) => {
-    Meals.findOneAndUpdate(req.params.id, req.body)
-        .then(() => res.status(204))
+    Meals.findByIdAndUpdate(req.params.id, req.body)
+        .then(() => res.status(200).send({message: 'Actualizado correctamente'}))
         .catch(err => console.log(err))
 })
 
-router.delete('/:', (req, res) => {
+router.delete('/:id', (req, res) => {
     Meals.findOneAndDelete(req.params.id)
-        .then(() => res.status(204))
+        .then(() => res.status(204).send('Se elimino de manera correcta'))
         .catch(err => console.log(err))
 })
 
