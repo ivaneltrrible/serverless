@@ -1,6 +1,7 @@
-const express = require('express');
-const crypto = require('crypto')
-const Users = require('../models/Users');
+import { Router } from 'express';
+import { randomBytes, pbkdf2 } from 'crypto';
+import { sign } from 'jsonwebtoken';
+import { findOne, create } from '../models/Users';
 //const app = express();
 
 /*app.route('/')
@@ -12,18 +13,56 @@ const Users = require('../models/Users');
     })
 */
 
-const router = express.Router();
+const router = Router();
+
+const signToken = (_id) => {
+    return sign({ _id }, 'mi-secreto', {
+        expiresIn: 60 * 60 * 24 * 365,
+    })
+}
 
 router.post('/register', (req, res) => {
     const { email, password } = req.body
-    crypto.randomBytes(16, (err, buferSalt) => {
-        const salt = buferSalt.toString('base64')
-        if (err) throw err;
-        console.log(`Asi es en bufer: ${buferSalt} asi es el length ${salt.length} asi es en string: ${salt}`)
-    })
+    findOne({ email }).exec()
+            .then( user => {
+                if(user){
+                    res.send(`El email: ${email} que ingresaste ya esta registrado`)
+                }
+                randomBytes(16, (err, buferSalt) => {
+                    const salt = buferSalt.toString('base64')
+                    if (err) throw err;
+                    pbkdf2(password, salt, 10000, 64, 'sha1', (err, key) => {
+                        if (err) throw err;
+                        const encryptedPassword = key.toString('base64');
+                        create({ 
+                            email: email, 
+                            password: encryptedPassword,
+                            salt: salt
+                        })
+                        .then(() => res.send(`Usuario creado con exito ${email}`))
+                    })
+                })
+                
+            })
+    
 })
 router.post('/login', (req, res) => {
-    res.send('Desde login')
+    const { email, password } = req.body
+    User.findOne({ email })
+        .then( user => {
+            if(!user){
+                return res.send('Usuario y/o contraseña incorrecta')
+            }
+            pbkdf2(password, user.salt, 10000, 64, 'sha1', (err, key) => {
+                if(err) throw err
+                const encryptedPassword = key.toString('base64')
+                if(encryptedPassword === user.password){
+                    const token = signToken(user._id)
+                    return res.send({ token })
+                }
+                return res.send('Usuario y/o contraseña incorrecta')
+            })
+        })
 })
 
-module.exports = router;
+export default router;
