@@ -1,5 +1,6 @@
 const express = require('express');
 const Orders = require('../models/Orders');
+const { isAuthenticated, hasRoles } = require('../auth/index')
 //const app = express();
 
 /*app.route('/')
@@ -29,22 +30,22 @@ router.get('/:id', (req, res) => {
         .catch(err => res.status(500).send(err))
 })
 
-router.post('/', (req, res) => {
+router.post('/', isAuthenticated, (req, res) => {
     Orders.create(req.body)
         .then(result => res.status(201).send(result))
         .catch(err => console.log(err))
 })
 
-router.put('/:id', (req, res) => {
+router.put('/:id',isAuthenticated, hasRoles(['admin', 'user']), (req, res) => {
     Orders.findOneAndUpdate(req.params.id, req.body)
         .then(() => res.status(204))
         .catch(err => console.log(err))
 })
 
-router.delete('/:', (req, res) => {
+router.delete('/:',isAuthenticated, (req, res) => {
     Orders.findOneAndDelete(req.params.id)
         .then(() => res.status(204))
         .catch(err => console.log(err))
 })
 
-module.exports = router;
+module.exports = router

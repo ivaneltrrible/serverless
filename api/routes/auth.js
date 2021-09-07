@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { randomBytes, pbkdf2 } from 'crypto';
 import { sign } from 'jsonwebtoken';
 import { findOne, create } from '../models/Users';
+import { isAuthenticated } from '../auth/index';
 //const app = express();
 
 /*app.route('/')
@@ -65,4 +66,8 @@ router.post('/login', (req, res) => {
         })
 })
 
-export default router;
+router.get('/me', isAuthenticated, (req, res) => {
+    res.send(req.user)  
+})
+
+module.exports = router;

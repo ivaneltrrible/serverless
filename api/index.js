@@ -1,17 +1,17 @@
-const express = require('express');
-const cors = require('cors');
-const mongoose = require('mongoose');
+import express, { json } from 'express';
+import cors from 'cors';
+import { connect } from 'mongoose';
 
 //Llamados de rutas
-const mealsRoute = require('./routes/meals');
-const ordersRoute = require('./routes/orders');
-const authRoute = require('./routes/auth');
+import mealsRoute from './routes/meals';
+import ordersRoute from './routes/orders';
+import authRoute from './routes/auth';
 
-const app = express();
-app.use(express.json());
-//app.use(cors());
+const app = express()
+app.use(json())
+app.use(cors())
 
-mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
 
 
 
