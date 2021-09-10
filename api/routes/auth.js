@@ -49,7 +49,7 @@ router.post('/register', (req, res) => {
 })
 router.post('/login', (req, res) => {
     const { email, password } = req.body
-    User.findOne({ email })
+    findOne({ email })
         .then( user => {
             if(!user){
                 return res.send('Usuario y/o contraseña incorrecta')
